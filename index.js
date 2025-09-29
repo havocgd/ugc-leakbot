@@ -138,10 +138,11 @@ client.on('messageCreate', async (msg) => {
         body: JSON.stringify(logPayload)
       });
 
-      const text = await res.text();
-      console.log("📦 KV log response:", res.status, text);
     } catch (err) {
       console.error("❌ KV log failed:", err);
     }
   } else {
-    console.log("⏸️ Message ignored
+    console.log("⏸️ Message ignored — no catalog link or 'limited' keyword");
+  }
+});
+
