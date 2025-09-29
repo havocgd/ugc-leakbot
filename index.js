@@ -8,7 +8,6 @@ app.listen(3000, () => console.log('Web server running on port 3000'));
 // --- Discord bot setup ---
 const { Client, GatewayIntentBits } = require('discord.js');
 
-
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -16,6 +15,9 @@ const client = new Client({
     GatewayIntentBits.MessageContent
   ]
 });
+
+// Debug: print token to verify it's injected correctly
+console.log("DISCORD_TOKEN:", process.env.DISCORD_TOKEN);
 
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
@@ -25,4 +27,8 @@ client.on('error', (err) => {
   console.error('❌ Discord client error:', err);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+try {
+  client.login(process.env.DISCORD_TOKEN);
+} catch (err) {
+  console.error("❌ Login failed:", err);
+}
