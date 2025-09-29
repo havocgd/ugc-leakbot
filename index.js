@@ -80,6 +80,23 @@ client.on('messageCreate', async (msg) => {
     if (details.thumbnail) embed.setImage(details.thumbnail);
 
     msg.channel.send({ embeds: [embed] });
+
+    // --- Log to Cloudflare KV via Worker ---
+    const dropId = catalogUrl.split('/').pop();
+    const logPayload = {
+      id: dropId,
+      name: details.name,
+      price: details.price,
+      timer: details.timer,
+      thumbnail: details.thumbnail,
+      timestamp: Date.now()
+    };
+
+    await fetch("https://ugc-leak-logger.havocgdash.workers.dev/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(logPayload)
+    });
   }
 });
 
