@@ -5,7 +5,6 @@ const app = express();
 app.get('/', (req, res) => res.send('UGC Leak Bot is alive!'));
 app.listen(8000, () => console.log('Web server running on port 8000'));
 
-
 // --- Discord bot setup ---
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = require('node-fetch');
@@ -20,7 +19,7 @@ const client = new Client({
 
 console.log("DISCORD_TOKEN:", process.env.DISCORD_TOKEN); // Debug token injection
 
-client.once('clientReady', () => {
+client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
@@ -53,21 +52,43 @@ async function scrapeUGCDetails(catalogUrl) {
 
 // --- Webhook message listener ---
 client.on('messageCreate', async (msg) => {
-  if (msg.author.bot) return;
-  if (!msg.webhookId) return;
+  if (msg.author.bot || !msg.webhookId) return;
 
   console.log("Webhook message received:", msg.content);
 
-  if (
-    msg.content.includes("roblox.com/catalog/") &&
-    msg.content.toLowerCase().includes("limited")
-  ) {
-    console.log("✅ UGC limited detected:", msg.content);
+  const catalogRegex = /https:\/\/www\.roblox\.com\/catalog\/\d+/;
+  let catalogUrl = null;
 
-    const match = msg.content.match(/https:\/\/www\.roblox\.com\/catalog\/\d+/);
-    if (!match) return;
+  // Check plain content
+  if (msg.content && catalogRegex.test(msg.content)) {
+    catalogUrl = msg.content.match(catalogRegex)[0];
+  }
 
-    const catalogUrl = match[0];
+  // Check embeds
+  if (!catalogUrl && msg.embeds?.length) {
+    for (const embed of msg.embeds) {
+      const fields = [
+        embed.title,
+        embed.description,
+        embed.url,
+        ...(embed.fields?.map(f => f.value) || [])
+      ];
+
+      for (const field of fields) {
+        if (field && catalogRegex.test(field)) {
+          catalogUrl = field.match(catalogRegex)[0];
+          break;
+        }
+      }
+
+      if (catalogUrl) break;
+    }
+  }
+
+  // Proceed only if catalog link found and message mentions "limited"
+  if (catalogUrl && msg.content.toLowerCase().includes("limited")) {
+    console.log("✅ UGC limited detected:", catalogUrl);
+
     const details = await scrapeUGCDetails(catalogUrl);
     if (!details) return;
 
