@@ -7,7 +7,7 @@ app.listen(3000, () => console.log('Web server running on port 3000'));
 
 // --- Discord bot setup ---
 const { Client, GatewayIntentBits } = require('discord.js');
-require('dotenv').config();
+
 
 const client = new Client({
   intents: [
