@@ -3,7 +3,8 @@ const express = require('express');
 const app = express();
 
 app.get('/', (req, res) => res.send('UGC Leak Bot is alive!'));
-app.listen(3000, () => console.log('Web server running on port 3000'));
+app.listen(8000, () => console.log('Web server running on port 8000'));
+
 
 // --- Discord bot setup ---
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
